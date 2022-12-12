@@ -140,12 +140,20 @@ void MyPen::draw(float disassembled) const {
     pen_tip.draw();
 }
 
+const Color& MyPen::get_line_color() const {
+    return line_color;
+}
+
+bool MyPen::is_clicked() const {
+    return clicked;
+}
+
 void MyPen::perform_click() {
     clicked = !clicked;
 }
 
-const Color& MyPen::get_line_color() const {
-    return line_color;
+void MyPen::set_line_color(const Color& color) {
+    line_color = color;
 }
 
 MyPen::Barrel::Barrel()

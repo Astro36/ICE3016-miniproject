@@ -19,7 +19,9 @@ public:
     ~MyPen() = default;
     void draw(float disassembled = 0.0f) const;
     const Color& get_line_color() const;
+    bool is_clicked() const;
     void perform_click();
+    void set_line_color(const Color& color);
 
 private:
     class Barrel {

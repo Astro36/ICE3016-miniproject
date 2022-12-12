@@ -11,18 +11,16 @@
 
 int window_width = 500;
 int window_height = 500;
+int prev_window_width = 500;
+int prev_window_height = 500;
 
-GLUquadric* cylinder_quad = gluNewQuadric();
-GLUquadric* sphere_quad = gluNewQuadric();
-GLuint textures[TEXTURES];
-GLfloat light_position[] = { 10, 10, 10, 1 };
 HDC hdc; // handle display context
 
 Camera camera{ 20, 45, 45 };
-
 CubeMap* cube_map;
 MyPen* pen_obj;
 Paper* paper;
+
 float pen_x, pen_y;
 
 float animated = 0.0f;
@@ -32,9 +30,11 @@ bool fullscreen = false;
 void toggle_fullscreen() {
     fullscreen = !fullscreen;
     if (fullscreen) {
+        prev_window_width = glutGet(GLUT_WINDOW_WIDTH);
+        prev_window_height = glutGet(GLUT_WINDOW_HEIGHT);
         glutFullScreen();
     } else {
-        glutReshapeWindow(window_width, window_height);
+        glutReshapeWindow(prev_window_width, prev_window_height);
     }
 }
 
@@ -54,18 +54,7 @@ void init() {
 
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
-
-    // char filenames[TEXTURES][20] = {
-    //     "img/TexImage0.bmp", "img/TexImage1.bmp", "img/TexImage2.bmp", "img/TexImage3.bmp", "img/TexImage4.bmp", "img/TexImage5.bmp",
-    //     "img/CIDER_T.bmp", "img/CIDER_S.bmp", "img/CIDER_B.bmp", "img/coke.bmp",
-    //     "img/EARTH.bmp"
-    // };
     glEnable(GL_TEXTURE_2D);
-    // glGenTextures(TEXTURES, textures);
-    // for (int i = 0; i < TEXTURES; i += 1) {
-    //     //Bitmap image{ filenames[i] };
-    //     //init_texture(textures[i], image);
-    // }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -125,7 +114,7 @@ void draw(void) {
     glViewport(0, 0, window_width, window_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (double) window_width / window_height, 1.0, 100.0);
+    gluPerspective(45.0, (double) window_width / window_height, 0.1, 100.0);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -133,8 +122,6 @@ void draw(void) {
     glLoadIdentity();
 
     camera.setup();
-
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     cube_map->draw();
 
@@ -144,6 +131,7 @@ void draw(void) {
     glTranslatef(pen_x, 1.89f, pen_y);
     glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
     pen_obj->draw(animated);
+    draw_axis(1);
 
     // text
     draw_text(hdc, L"안녕");
@@ -195,11 +183,6 @@ void resize_cb(int width, int height) {
 
 void keyboard_cb(unsigned char key, int x, int y) {
     switch (key) {
-    case '0': // camera
-        light_position[0] = 10;
-        light_position[1] = 10;
-        light_position[2] = 10;
-        break;
     case 'z':
         camera.zoom_in();
         break;
@@ -223,7 +206,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
 
 void special_keyboard_cb(int key, int x, int y) {
     switch (key) {
-    case GLUT_KEY_F2:
+    case GLUT_KEY_F11:
         toggle_fullscreen();
         break;
     case GLUT_KEY_LEFT:

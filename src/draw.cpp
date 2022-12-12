@@ -3,6 +3,7 @@
 #include <string>
 
 void draw_axis(float length) {
+    glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
     glColor3f(1.0f, 0.0f, 0.0f); // X
     glVertex3f(0.0f, 0.0f, 0.0f);
@@ -16,6 +17,7 @@ void draw_axis(float length) {
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, 0.0f, length * 2);
     glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 void draw_text(const HDC& hdc, const std::wstring& text) {

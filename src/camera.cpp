@@ -38,6 +38,9 @@ void Camera::rotate_down() {
 
 void Camera::zoom_in() {
     radius -= camera_zoom_speed;
+    if (radius < 0) {
+        radius = 0;
+    }
 }
 
 void Camera::zoom_out() {

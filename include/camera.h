@@ -1,7 +1,7 @@
 #pragma once
 
-constexpr float camera_rotation_speed = 5.0f;
-constexpr float camera_zoom_speed = 5.0f;
+constexpr float camera_rotation_speed = 1.0f;
+constexpr float camera_zoom_speed = 1.0f;
 
 class Camera {
 public:
