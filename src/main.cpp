@@ -1,4 +1,5 @@
 ﻿#include <GL/glut.h>
+#include <Windows.h>
 #include <math.h>
 #include <algorithm>
 #include <iostream>
@@ -54,12 +55,16 @@ void toggleFullscreen() {
     }
 }
 
-void init() {
-    pen_obj = new MyPen();
-
+void init_font(HDC& hdc) {
     hdc = wglGetCurrentDC();
     HFONT font = CreateFont(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, HANGUL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("맑은 고딕"));
     SelectObject(hdc, font);
+}
+
+void init() {
+    pen_obj = new MyPen();
+
+    init_font(hdc);
 
     glClearColor(0, 0, 0, 1.0f);
 
@@ -71,14 +76,14 @@ void init() {
     //     "img/CIDER_T.bmp", "img/CIDER_S.bmp", "img/CIDER_B.bmp", "img/coke.bmp",
     //     "img/EARTH.bmp"
     // };
-    // glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
     // glGenTextures(TEXTURES, textures);
     // for (int i = 0; i < TEXTURES; i += 1) {
     //     //Bitmap image{ filenames[i] };
     //     //init_texture(textures[i], image);
     // }
-    // glGenTextures(1, &paper_texture);
-    // init_texture(paper_texture, paper);
+    glGenTextures(1, &paper_texture);
+    init_texture(paper_texture, paper);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -175,38 +180,6 @@ void init2() {
     init_cube_map_texture();
 }
 
-void draw_string() {
-    glPushAttrib(GL_LIGHTING_BIT);
-    glDisable(GL_LIGHTING);
-
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    gluOrtho2D(0.0, 10.0, 10.0, 0.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glColor3f(1.0f, 1.0f, 1.0f); // white
-    glRasterPos3f(0.5f, 1.0f, 0.0f);
-    std::wstring text = L"1234 한글";
-    for (int i = 0; i < text.size(); i += 1) {
-        int list = glGenLists(1);
-        wglUseFontBitmapsW(hdc, text[i], 1, list);
-        glCallList(list);
-        glDeleteLists(list, 1);
-    }
-    glPopMatrix();
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-
-    glMatrixMode(GL_MODELVIEW);
-    glPopAttrib();
-}
-
 void draw_paper(float size = 1.0f) {
     glBindTexture(GL_TEXTURE_2D, paper_texture);
     glBegin(GL_QUADS);
@@ -246,7 +219,7 @@ void draw(void) {
     pen_obj->draw(animated);
 
     // text
-    draw_string();
+    draw_text(hdc, L"안녕");
 
     glFlush();
 
@@ -277,6 +250,7 @@ void draw(void) {
 void motion_cb(int x, int y) {
     int paper_x = x * paper.get_width() / window_width;
     int paper_y = paper.get_height() - (y * paper.get_height() / window_height);
+    std::cout << paper_x << ' ' << paper_y << '\n';
     paper.fill_pixel(paper_x, paper_y, pen_obj->get_line_color());
     update_texture(paper_texture, paper);
     pen_x = (x * 10.0f / window_width) - 5.0f; // paper size = 10.f
