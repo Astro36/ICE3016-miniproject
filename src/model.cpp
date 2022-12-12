@@ -225,7 +225,7 @@ void MyPen::Spring::draw_compressed() const {
     glColor3f(1.0f, 0.0f, 0.0f);
     glPushMatrix();
     glScalef(0.4f, 1.0f, 1.0f);
-    glTranslatef(1.98f, 0, 0);
+    glTranslatef(1.98f, 0.0f, 0.0f);
     obj->draw();
     glPopMatrix();
 }
@@ -252,4 +252,62 @@ MyPen::Reservoir::~Reservoir() {
 void MyPen::Reservoir::draw() const {
     glColor4f(0.95f, 0.95f, 1.0f, 0.8f);
     obj->draw();
+}
+
+Paper::Paper(float width, float height, int image_width, int image_height)
+: width(width), height(height) {
+    image = new Bitmap{ image_width, image_height };
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, image->get_width(), image->get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->get_pixels());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void Paper::draw() const {
+    float half_width = width / 2;
+    float half_height = height / 2;
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glBegin(GL_QUADS);
+    glNormal3f(0.0f, 1.0, 0.0f);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half_width / 2, 0.0f, half_height / 2);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(half_width / 2, 0.0f, half_height / 2);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(half_width / 2, 0.0f, -half_height / 2);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-half_width / 2, 0.0f, -half_height / 2);
+    glEnd();
+}
+
+void Paper::fill_pixel(int x, int y, const Color& color) {
+    image->fill_pixel(x, y, color);
+}
+
+float Paper::get_width() const {
+    return width;
+}
+
+float Paper::get_height() const {
+    return height;
+}
+
+int Paper::get_image_width() const {
+    return image->get_width();
+}
+
+int Paper::get_image_height() const {
+    return image->get_height();
+}
+
+void Paper::save_as(const std::string& out_filename) const {
+    image->save(out_filename, "res/image.bmp");
+}
+
+void Paper::update_texture() const {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, image->get_width(), image->get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->get_pixels());
 }

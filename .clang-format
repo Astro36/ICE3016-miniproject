@@ -38,12 +38,14 @@ ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 IncludeBlocks: Merge
 IncludeCategories:
-  - Regex: '^<.*\.h>'
+  - Regex: '^<.*glut\.h>'
     Priority: 1
-  - Regex: '^<.*'
+  - Regex: '^<.*glext\.h>'
     Priority: 2
-  - Regex: '.*'
+  - Regex: '^<.*'
     Priority: 3
+  - Regex: '.*'
+    Priority: 4
 IndentCaseLabels: false
 # IndentGotoLabels: false
 IndentPPDirectives: AfterHash

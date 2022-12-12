@@ -115,3 +115,23 @@ private:
     bool clicked = false;
     Color line_color = { 0.0f, 0.0f, 0.0f };
 };
+
+class Paper {
+public:
+    Paper(float width = 20.0f, float height = 20.0f, int image_width = 512, int image_height = 512);
+    ~Paper() = default;
+    void draw() const;
+    void fill_pixel(int x, int y, const Color& color);
+    float get_width() const;
+    float get_height() const;
+    int get_image_width() const;
+    int get_image_height() const;
+    void save_as(const std::string& out_filename) const;
+    void update_texture() const;
+
+private:
+    unsigned int texture;
+    float width;
+    float height;
+    Bitmap* image;
+};

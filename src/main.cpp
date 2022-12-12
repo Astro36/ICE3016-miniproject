@@ -1,30 +1,13 @@
 ﻿#include <GL/glut.h>
 #include <Windows.h>
-#include <math.h>
 #include <algorithm>
 #include <iostream>
+#include <math.h>
 #include "camera.h"
 #include "draw.h"
 #include "model.h"
 
 #define TEXTURES 11
-
-void init_texture(int texture, const Bitmap& image);
-void update_texture(int texture, const Bitmap& image);
-
-void init_texture(int texture, const Bitmap& image) {
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, image.get_width(), image.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.get_pixels());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-}
-
-void update_texture(int texture, const Bitmap& image) {
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, image.get_width(), image.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.get_pixels());
-}
 
 int window_width = 500;
 int window_height = 500;
@@ -37,17 +20,16 @@ HDC hdc; // handle display context
 
 Camera camera{ 20, 45, 45 };
 
-CubeMap *cube_map;
+CubeMap* cube_map;
 MyPen* pen_obj;
+Paper* paper;
 float pen_x, pen_y;
-Bitmap paper{ 512, 512 };
-GLuint paper_texture;
 
 float animated = 0.0f;
 
 bool fullscreen = false;
 
-void toggleFullscreen() {
+void toggle_fullscreen() {
     fullscreen = !fullscreen;
     if (fullscreen) {
         glutFullScreen();
@@ -63,7 +45,8 @@ void init_font(HDC& hdc) {
 }
 
 void init() {
-    pen_obj = new MyPen();
+    pen_obj = new MyPen;
+    paper = new Paper;
 
     init_font(hdc);
 
@@ -83,8 +66,6 @@ void init() {
     //     //Bitmap image{ filenames[i] };
     //     //init_texture(textures[i], image);
     // }
-    glGenTextures(1, &paper_texture);
-    init_texture(paper_texture, paper);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -139,21 +120,6 @@ void init2() {
     init_light();
 }
 
-void draw_paper(float size = 1.0f) {
-    glBindTexture(GL_TEXTURE_2D, paper_texture);
-    glBegin(GL_QUADS);
-    glNormal3f(0.0f, 1.0, 0.0f);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-size / 2, 0.0f, size / 2);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(size / 2, 0.0f, size / 2);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(size / 2, 0.0f, -size / 2);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-size / 2, 0.0f, -size / 2);
-    glEnd();
-}
-
 void draw(void) {
     // main viewport
     glViewport(0, 0, window_width, window_height);
@@ -172,7 +138,7 @@ void draw(void) {
 
     cube_map->draw();
 
-    draw_paper(10.0f);
+    paper->draw();
 
     draw_axis(5);
     glTranslatef(pen_x, 1.89f, pen_y);
@@ -208,12 +174,16 @@ void draw(void) {
     glutSwapBuffers();
 }
 
+int prev_x, prev_y;
+
 void motion_cb(int x, int y) {
-    int paper_x = x * paper.get_width() / window_width;
-    int paper_y = paper.get_height() - (y * paper.get_height() / window_height);
+    int paper_x = x * paper->get_image_width() / window_width;
+    int paper_y = paper->get_image_height() - (y * paper->get_image_height() / window_height);
     std::cout << paper_x << ' ' << paper_y << '\n';
-    paper.fill_pixel(paper_x, paper_y, pen_obj->get_line_color());
-    update_texture(paper_texture, paper);
+    paper->fill_pixel(paper_x, paper_y, pen_obj->get_line_color());
+    paper->update_texture();
+    prev_x = x;
+    prev_y = y;
     pen_x = (x * 10.0f / window_width) - 5.0f; // paper size = 10.f
     pen_y = (y * 10.0f / window_height) - 5.0f;
 }
@@ -236,8 +206,8 @@ void keyboard_cb(unsigned char key, int x, int y) {
     case 'x':
         camera.zoom_out();
         break;
-    case 's': // save
-        paper.save("img/paper.bmp", "img/TexImage0.bmp");
+    case 's':
+        paper->save_as("paper.bmp");
         break;
     case ',':
         animated = std::max(animated - 0.1f, 0.0f);
@@ -254,7 +224,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
 void special_keyboard_cb(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_F2:
-        toggleFullscreen();
+        toggle_fullscreen();
         break;
     case GLUT_KEY_LEFT:
         camera.rotate_left();
