@@ -1,15 +1,19 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
-
+#pragma once
 #include <string>
-#include "color.h"
+
+struct Color {
+    float red;
+    float green;
+    float blue;
+};
 
 class Bitmap {
 public:
     Bitmap(int width, int height);
     Bitmap(const std::string& filename);
     ~Bitmap();
-    void draw_point(int x, int y, Color color);
+    void fill_pixel(int x, int y, const Color& color);
+    int get_channels() const;
     int get_width() const;
     int get_height() const;
     unsigned char* get_pixels() const;
@@ -22,8 +26,4 @@ private:
     unsigned char* pixels;
 };
 
-void init_texture(int texture, const Bitmap& image);
-void update_texture(int texture, const Bitmap& image);
 void reverse_each_pixel(int width, int height, unsigned char* pixels);
-
-#endif // TEXTURE_H

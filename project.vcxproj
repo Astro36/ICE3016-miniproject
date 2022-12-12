@@ -19,17 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\color.h" />
-    <ClInclude Include="include\mypen.h" />
-    <ClInclude Include="include\object.h" />
-    <ClInclude Include="include\texture.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="src\bitmap.cpp" />
     <ClCompile Include="src\draw.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\mypen.cpp" />
+    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\object.cpp" />
-    <ClCompile Include="src\texture.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\bitmap.h" />
+    <ClInclude Include="include\draw.h" />
+    <ClInclude Include="include\model.h" />
+    <ClInclude Include="include\object.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

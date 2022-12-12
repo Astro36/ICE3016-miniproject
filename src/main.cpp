@@ -1,11 +1,10 @@
+#define _USE_MATH_DEFINES
 #include <GL/glut.h>
+#include <math.h>
 #include <algorithm>
 #include <iostream>
-#include "mypen.h"
-#include "texture.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include "draw.h"
+#include "model.h"
 
 #define WINDOW_WIDTH 500
 #define WINDOW_HEIGHT 500
@@ -13,6 +12,23 @@
 #define ROTATION_SPEED 10.0
 #define ZOOM_SPEED 1.0
 #define TEXTURES 11
+
+void init_texture(int texture, const Bitmap& image);
+void update_texture(int texture, const Bitmap& image);
+
+void init_texture(int texture, const Bitmap& image) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, image.get_width(), image.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.get_pixels());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void update_texture(int texture, const Bitmap& image) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, image.get_width(), image.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.get_pixels());
+}
 
 typedef struct spherical {
     double r;
@@ -46,7 +62,7 @@ void init() {
     pen_obj = new MyPen();
 
     hdc = wglGetCurrentDC();
-    HFONT font = CreateFont(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, HANGUL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"∏º¿∫ ∞ÌµÒ");
+    HFONT font = CreateFont(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, HANGUL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"ÎßëÏùÄ Í≥†Îîï");
     SelectObject(hdc, font);
 
     glClearColor(0, 0, 0, 1.0f);
@@ -54,24 +70,19 @@ void init() {
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
 
-    gluQuadricTexture(cylinder_quad, GL_TRUE);
-    gluQuadricTexture(sphere_quad, GL_TRUE);
-    gluQuadricNormals(cylinder_quad, GLU_SMOOTH);
-    gluQuadricNormals(sphere_quad, GLU_SMOOTH);
-
-    char filenames[TEXTURES][20] = {
-        "img/TexImage0.bmp", "img/TexImage1.bmp", "img/TexImage2.bmp", "img/TexImage3.bmp", "img/TexImage4.bmp", "img/TexImage5.bmp",
-        "img/CIDER_T.bmp", "img/CIDER_S.bmp", "img/CIDER_B.bmp", "img/coke.bmp",
-        "img/EARTH.bmp"
-    };
-    glEnable(GL_TEXTURE_2D);
-    glGenTextures(TEXTURES, textures);
-    for (int i = 0; i < TEXTURES; i += 1) {
-        //Bitmap image{ filenames[i] };
-        //init_texture(textures[i], image);
-    }
-    glGenTextures(1, &paper_texture);
-    init_texture(paper_texture, paper);
+    // char filenames[TEXTURES][20] = {
+    //     "img/TexImage0.bmp", "img/TexImage1.bmp", "img/TexImage2.bmp", "img/TexImage3.bmp", "img/TexImage4.bmp", "img/TexImage5.bmp",
+    //     "img/CIDER_T.bmp", "img/CIDER_S.bmp", "img/CIDER_B.bmp", "img/coke.bmp",
+    //     "img/EARTH.bmp"
+    // };
+    // glEnable(GL_TEXTURE_2D);
+    // glGenTextures(TEXTURES, textures);
+    // for (int i = 0; i < TEXTURES; i += 1) {
+    //     //Bitmap image{ filenames[i] };
+    //     //init_texture(textures[i], image);
+    // }
+    // glGenTextures(1, &paper_texture);
+    // init_texture(paper_texture, paper);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -95,22 +106,77 @@ void init() {
     glEnable(GL_CULL_FACE);
 }
 
-void draw_axis(double axis_length) {
-    glBegin(GL_LINES);
-    glColor3d(1.0, 0.0, 0.0); // X√‡¿∫ red
-    glVertex3d(0, 0, 0);
-    glVertex3d(axis_length * 2, 0, 0);
+void init_light() {
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    float light_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 
-    glColor3d(0.0, 1.0, 0.0); // Y√‡¿∫ green
-    glVertex3d(0, 0, 0);
-    glVertex3d(0, axis_length * 2, 0);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glMaterialf(GL_FRONT, GL_SHININESS, 16.0f);
+}
 
-    glColor3d(0.0, 0.0, 1.0); // Z√‡¿∫ blue
-    glVertex3d(0, 0, 0);
-    glVertex3d(0, 0, axis_length * 2);
+void init_cube_map_texture() {
+    // glGenTextures(1, &texture_cube_map);
+    // glEnable(GL_TEXTURE_CUBE_MAP);
+    // glBindTexture(GL_TEXTURE_CUBE_MAP, texture_cube_map);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    glColor3d(1.0, 1.0, 1.0);
-    glEnd();
+    // int image_width, image_height, channels;
+    // unsigned char* image;
+
+    // image = readImageData("img/1024px.bmp", &image_width, &image_height, &channels);
+    // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    // delete[] image;
+
+    // image = readImageData("img/1024nx.bmp", &image_width, &image_height, &channels);
+    // glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    // delete[] image;
+
+    // image = readImageData("img/1024py.bmp", &image_width, &image_height, &channels);
+    // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    // delete[] image;
+
+    // image = readImageData("img/1024ny.bmp", &image_width, &image_height, &channels);
+    // glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    // delete[] image;
+
+    // image = readImageData("img/1024pz.bmp", &image_width, &image_height, &channels);
+    // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    // delete[] image;
+
+    // image = readImageData("img/1024nz.bmp", &image_width, &image_height, &channels);
+    // glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    // delete[] image;
+
+    // glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+    // glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+    // glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+}
+
+void init2() {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearDepth(1.0);
+
+    init_light();
+    init_cube_map_texture();
 }
 
 void draw_string() {
@@ -121,7 +187,7 @@ void draw_string() {
     glPushMatrix();
     glLoadIdentity();
 
-    gluOrtho2D(0.0, 10.0, 10.0, 0.0); // ¡¬√¯ ªÛ¥‹¿Ã (0, 0)
+    gluOrtho2D(0.0, 10.0, 10.0, 0.0);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -129,7 +195,7 @@ void draw_string() {
 
     glColor3f(1.0f, 1.0f, 1.0f); // white
     glRasterPos3f(0.5f, 1.0f, 0.0f);
-    std::wstring text = L"∫º∆Ê ƒ´≈ª∑Œ±◊(±◊∏Æ±‚)";
+    std::wstring text = L"1234";
     for (int i = 0; i < text.size(); i += 1) {
         int list = glGenLists(1);
         wglUseFontBitmapsW(hdc, text[i], 1, list);
@@ -165,7 +231,7 @@ void draw(void) {
     glViewport(0, 0, window_width, window_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45, (float)window_width / window_height, 1, 50);
+    gluPerspective(45, (float) window_width / window_height, 1, 50);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -221,7 +287,7 @@ void draw(void) {
 void motion_cb(int x, int y) {
     int paper_x = x * paper.get_width() / window_width;
     int paper_y = paper.get_height() - (y * paper.get_height() / window_height);
-    paper.draw_point(paper_x, paper_y, pen_obj->get_color());
+    paper.fill_pixel(paper_x, paper_y, pen_obj->get_line_color());
     update_texture(paper_texture, paper);
     pen_x = (x * 10.0f / window_width) - 5.0f; // paper size = 10.f
     pen_y = (y * 10.0f / window_height) - 5.0f;
@@ -255,7 +321,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
         animated += 0.1;
         break;
     case ' ':
-        pen_obj->click();
+        pen_obj->perform_click();
         break;
     }
 }
@@ -298,7 +364,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_MULTISAMPLE | GLUT_DEPTH);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(300, 300);
-    glutCreateWindow("12191765 π⁄Ω¬¿Á");
+    glutCreateWindow("12191765");
     init();
 
     glutDisplayFunc(draw);
