@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bitmap.cpp" />
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\draw.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\model.cpp" />
@@ -27,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\bitmap.h" />
+    <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\draw.h" />
     <ClInclude Include="include\model.h" />
     <ClInclude Include="include\object.h" />

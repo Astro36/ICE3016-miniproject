@@ -1,16 +1,11 @@
-#define _USE_MATH_DEFINES
-#include <GL/glut.h>
+﻿#include <GL/glut.h>
 #include <math.h>
 #include <algorithm>
 #include <iostream>
+#include "camera.h"
 #include "draw.h"
 #include "model.h"
 
-#define WINDOW_WIDTH 500
-#define WINDOW_HEIGHT 500
-#define EPSILON 1e-7F
-#define ROTATION_SPEED 10.0
-#define ZOOM_SPEED 1.0
 #define TEXTURES 11
 
 void init_texture(int texture, const Bitmap& image);
@@ -30,22 +25,16 @@ void update_texture(int texture, const Bitmap& image) {
     glTexImage2D(GL_TEXTURE_2D, 0, 3, image.get_width(), image.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.get_pixels());
 }
 
-typedef struct spherical {
-    double r;
-    double phi;
-    double theta;
-} spherical_t;
-
-int window_width = WINDOW_WIDTH;
-int window_height = WINDOW_HEIGHT;
+int window_width = 500;
+int window_height = 500;
 
 GLUquadric* cylinder_quad = gluNewQuadric();
 GLUquadric* sphere_quad = gluNewQuadric();
 GLuint textures[TEXTURES];
-// spherical_t camera = { 5, 45, 45 };
-spherical_t camera = { 5, 0, 0 };
 GLfloat light_position[] = { 10, 10, 10, 1 };
 HDC hdc; // handle display context
+
+Camera camera{ 20, 45, 45 };
 
 MyPen* pen_obj;
 float pen_x, pen_y;
@@ -54,15 +43,22 @@ GLuint paper_texture;
 
 float animated = 0.0f;
 
-double radian(double degree) {
-    return degree * M_PI / 180;
+bool fullscreen = false;
+
+void toggleFullscreen() {
+    fullscreen = !fullscreen;
+    if (fullscreen) {
+        glutFullScreen();
+    } else {
+        glutReshapeWindow(window_width, window_height);
+    }
 }
 
 void init() {
     pen_obj = new MyPen();
 
     hdc = wglGetCurrentDC();
-    HFONT font = CreateFont(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, HANGUL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"맑은 고딕");
+    HFONT font = CreateFont(24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, HANGUL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("맑은 고딕"));
     SelectObject(hdc, font);
 
     glClearColor(0, 0, 0, 1.0f);
@@ -195,7 +191,7 @@ void draw_string() {
 
     glColor3f(1.0f, 1.0f, 1.0f); // white
     glRasterPos3f(0.5f, 1.0f, 0.0f);
-    std::wstring text = L"1234";
+    std::wstring text = L"1234 한글";
     for (int i = 0; i < text.size(); i += 1) {
         int list = glGenLists(1);
         wglUseFontBitmapsW(hdc, text[i], 1, list);
@@ -238,13 +234,7 @@ void draw(void) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    if (camera.theta == 0 || camera.theta == 180) {
-        camera.theta += EPSILON;
-    }
-    double x = camera.r * sin(radian(camera.theta)) * cos(radian(camera.phi));
-    double y = camera.r * sin(radian(camera.theta)) * sin(radian(camera.phi));
-    double z = camera.r * cos(radian(camera.theta));
-    gluLookAt(y, z, x, 0, 0, 0, 0, (0 <= camera.theta && camera.theta < 180 ? 1 : -1), 0);
+    camera.setup();
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -305,11 +295,11 @@ void keyboard_cb(unsigned char key, int x, int y) {
         light_position[1] = 10;
         light_position[2] = 10;
         break;
-    case 'z': // zoom in
-        camera.r -= ZOOM_SPEED;
+    case 'z':
+        camera.zoom_in();
         break;
-    case 'x': // zoom out
-        camera.r += ZOOM_SPEED;
+    case 'x':
+        camera.zoom_out();
         break;
     case 's': // save
         paper.save("img/paper.bmp", "img/TexImage0.bmp");
@@ -328,51 +318,42 @@ void keyboard_cb(unsigned char key, int x, int y) {
 
 void special_keyboard_cb(int key, int x, int y) {
     switch (key) {
+    case GLUT_KEY_F2:
+        toggleFullscreen();
+        break;
     case GLUT_KEY_LEFT:
-        camera.phi -= ROTATION_SPEED;
-        if (camera.phi < 0) {
-            camera.phi += 360;
-        }
+        camera.rotate_left();
         break;
     case GLUT_KEY_UP:
-        camera.theta -= ROTATION_SPEED;
-        if (camera.theta < 0) {
-            camera.theta += 360;
-        }
+        camera.rotate_up();
         break;
     case GLUT_KEY_RIGHT:
-        camera.phi += ROTATION_SPEED;
-        if (camera.phi >= 360) {
-            camera.phi -= 360;
-        }
+        camera.rotate_right();
         break;
     case GLUT_KEY_DOWN:
-        camera.theta += ROTATION_SPEED;
-        if (camera.theta >= 360) {
-            camera.theta -= 360;
-        }
+        camera.rotate_down();
         break;
     }
 }
 
-void background(void) {
+void background_cb(void) {
     glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_MULTISAMPLE | GLUT_DEPTH);
-    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(window_width, window_height);
     glutInitWindowPosition(300, 300);
-    glutCreateWindow("12191765");
+    glutCreateWindow("12191765 박승재");
     init();
 
     glutDisplayFunc(draw);
     glutReshapeFunc(resize_cb);
-    glutMotionFunc(motion_cb); // main
+    glutMotionFunc(motion_cb);
     glutKeyboardFunc(keyboard_cb);
     glutSpecialFunc(special_keyboard_cb);
-    glutIdleFunc(background);
+    glutIdleFunc(background_cb);
 
     glutMainLoop();
     return 0;
