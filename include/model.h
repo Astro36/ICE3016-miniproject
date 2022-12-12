@@ -2,8 +2,21 @@
 #include "bitmap.h"
 #include "object.h"
 
+class CubeMap {
+public:
+    CubeMap(float size = 50.0f);
+    ~CubeMap() = default;
+    void draw() const;
+
+private:
+    unsigned int texture;
+    float size;
+};
+
 class MyPen {
 public:
+    MyPen() = default;
+    ~MyPen() = default;
     void draw(float disassembled = 0.0f) const;
     const Color& get_line_color() const;
     void perform_click();

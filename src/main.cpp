@@ -37,6 +37,7 @@ HDC hdc; // handle display context
 
 Camera camera{ 20, 45, 45 };
 
+CubeMap *cube_map;
 MyPen* pen_obj;
 float pen_x, pen_y;
 Bitmap paper{ 512, 512 };
@@ -105,6 +106,7 @@ void init() {
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     glEnable(GL_CULL_FACE);
+    cube_map = new CubeMap();
 }
 
 void init_light() {
@@ -122,48 +124,6 @@ void init_light() {
     glMaterialf(GL_FRONT, GL_SHININESS, 16.0f);
 }
 
-void init_cube_map_texture() {
-    // glGenTextures(1, &texture_cube_map);
-    // glEnable(GL_TEXTURE_CUBE_MAP);
-    // glBindTexture(GL_TEXTURE_CUBE_MAP, texture_cube_map);
-    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    // int image_width, image_height, channels;
-    // unsigned char* image;
-
-    // image = readImageData("img/1024px.bmp", &image_width, &image_height, &channels);
-    // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    // delete[] image;
-
-    // image = readImageData("img/1024nx.bmp", &image_width, &image_height, &channels);
-    // glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    // delete[] image;
-
-    // image = readImageData("img/1024py.bmp", &image_width, &image_height, &channels);
-    // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    // delete[] image;
-
-    // image = readImageData("img/1024ny.bmp", &image_width, &image_height, &channels);
-    // glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    // delete[] image;
-
-    // image = readImageData("img/1024pz.bmp", &image_width, &image_height, &channels);
-    // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    // delete[] image;
-
-    // image = readImageData("img/1024nz.bmp", &image_width, &image_height, &channels);
-    // glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    // delete[] image;
-
-    // glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
-    // glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
-    // glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
-}
-
 void init2() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -177,7 +137,6 @@ void init2() {
     glClearDepth(1.0);
 
     init_light();
-    init_cube_map_texture();
 }
 
 void draw_paper(float size = 1.0f) {
@@ -200,7 +159,7 @@ void draw(void) {
     glViewport(0, 0, window_width, window_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45, (float) window_width / window_height, 1, 50);
+    gluPerspective(45.0, (double) window_width / window_height, 1.0, 100.0);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -210,6 +169,8 @@ void draw(void) {
     camera.setup();
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    cube_map->draw();
 
     draw_paper(10.0f);
 

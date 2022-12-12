@@ -9,6 +9,7 @@ struct Color {
 
 class Bitmap {
 public:
+    Bitmap() = delete;
     Bitmap(int width, int height);
     Bitmap(const std::string& filename);
     ~Bitmap();

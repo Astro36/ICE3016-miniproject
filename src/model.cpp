@@ -1,6 +1,110 @@
 #include "model.h"
 #include <GL/glut.h>
+#include <GL/glext.h>
+#include "bitmap.h"
 #include "object.h"
+
+CubeMap::CubeMap(float size)
+: size(size) {
+    glGenTextures(1, &texture);
+    glEnable(GL_TEXTURE_CUBE_MAP);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    Bitmap image_px{ "res/1024px.bmp" };
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, image_px.get_width(), image_px.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_px.get_pixels());
+    Bitmap image_nx{ "res/1024nx.bmp" };
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, image_nx.get_width(), image_nx.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_nx.get_pixels());
+    Bitmap image_py{ "res/1024py.bmp" };
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, image_py.get_width(), image_py.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_py.get_pixels());
+    Bitmap image_ny{ "res/1024ny.bmp" };
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, image_ny.get_width(), image_ny.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_ny.get_pixels());
+    Bitmap image_pz{ "res/1024pz.bmp" };
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, image_pz.get_width(), image_pz.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_pz.get_pixels());
+    Bitmap image_nz{ "res/1024nz.bmp" };
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, image_nz.get_width(), image_nz.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_nz.get_pixels());
+
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+    glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+}
+
+void CubeMap::draw() const {
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_CUBE_MAP);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+
+    float half_size = size / 2;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_QUADS);
+    // px
+    glTexCoord3f(1, -1, -1);
+    glVertex3f(half_size, -half_size, -half_size);
+    glTexCoord3f(1, -1, 1);
+    glVertex3f(half_size, -half_size, half_size);
+    glTexCoord3f(1, 1, 1);
+    glVertex3f(half_size, half_size, half_size);
+    glTexCoord3f(1, 1, -1);
+    glVertex3f(half_size, half_size, -half_size);
+
+    // nx
+    glTexCoord3f(-1, -1, 1);
+    glVertex3f(-half_size, -half_size, half_size);
+    glTexCoord3f(-1, -1, -1);
+    glVertex3f(-half_size, -half_size, -half_size);
+    glTexCoord3f(-1, 1, -1);
+    glVertex3f(-half_size, half_size, -half_size);
+    glTexCoord3f(-1, 1, 1);
+    glVertex3f(-half_size, half_size, half_size);
+
+    // py
+    glTexCoord3f(1, 1, 1);
+    glVertex3f(half_size, half_size, half_size);
+    glTexCoord3f(-1, 1, 1);
+    glVertex3f(-half_size, half_size, half_size);
+    glTexCoord3f(-1, 1, -1);
+    glVertex3f(-half_size, half_size, -half_size);
+    glTexCoord3f(1, 1, -1);
+    glVertex3f(half_size, half_size, -half_size);
+
+    // ny
+    glTexCoord3f(-1, -1, 1);
+    glVertex3f(-half_size, -half_size, half_size);
+    glTexCoord3f(1, -1, 1);
+    glVertex3f(half_size, -half_size, half_size);
+    glTexCoord3f(1, -1, -1);
+    glVertex3f(half_size, -half_size, -half_size);
+    glTexCoord3f(-1, -1, -1);
+    glVertex3f(-half_size, -half_size, -half_size);
+
+    // pz
+    glTexCoord3f(1, -1, 1);
+    glVertex3f(half_size, -half_size, half_size);
+    glTexCoord3f(-1, -1, 1);
+    glVertex3f(-half_size, -half_size, half_size);
+    glTexCoord3f(-1, 1, 1);
+    glVertex3f(-half_size, half_size, half_size);
+    glTexCoord3f(1, 1, 1);
+    glVertex3f(half_size, half_size, half_size);
+
+    // nz
+    glTexCoord3f(-1, -1, -1);
+    glVertex3f(-half_size, -half_size, -half_size);
+    glTexCoord3f(1, -1, -1);
+    glVertex3f(half_size, -half_size, -half_size);
+    glTexCoord3f(1, 1, -1);
+    glVertex3f(half_size, half_size, -half_size);
+    glTexCoord3f(-1, 1, -1);
+    glVertex3f(-half_size, half_size, -half_size);
+    glEnd();
+
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_LIGHTING);
+}
 
 void MyPen::draw(float disassembled) const {
     glTranslatef(-1.5f * disassembled, 0.0f, 0.0f);

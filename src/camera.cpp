@@ -9,30 +9,30 @@ Camera::Camera(float radius, float phi, float theta)
 }
 
 void Camera::rotate_left() {
-    phi -= camera_rotation_speed;
-    if (phi < 0) {
-        phi += 360;
-    }
-}
-
-void Camera::rotate_up() {
     theta -= camera_rotation_speed;
     if (theta < 0) {
         theta += 360;
     }
 }
 
-void Camera::rotate_right() {
+void Camera::rotate_up() {
     phi += camera_rotation_speed;
     if (phi >= 360) {
         phi -= 360;
     }
 }
 
-void Camera::rotate_down() {
+void Camera::rotate_right() {
     theta += camera_rotation_speed;
     if (theta >= 360) {
         theta -= 360;
+    }
+}
+
+void Camera::rotate_down() {
+    phi -= camera_rotation_speed;
+    if (phi < 0) {
+        phi += 360;
     }
 }
 
