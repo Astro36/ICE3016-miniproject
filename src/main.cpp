@@ -1,6 +1,7 @@
 ﻿#include <GL/glut.h>
 #include <Windows.h>
 #include <iostream>
+#include <mmsystem.h>
 #include "camera.h"
 #include "draw.h"
 #include "model.h"
@@ -191,6 +192,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
         } else {
             mypen->enable_drawing_mode();
         }
+        PlaySound(TEXT("res/click.wav"), NULL, SND_ASYNC);
         break;
     }
 }
