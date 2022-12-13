@@ -1,42 +1,27 @@
 ﻿#include <GL/glut.h>
 #include <Windows.h>
-#include <algorithm>
 #include <iostream>
-#include <math.h>
 #include "camera.h"
 #include "draw.h"
 #include "model.h"
-
-#define TEXTURES 11
 
 int window_width = 500;
 int window_height = 500;
 int prev_window_width = 500;
 int prev_window_height = 500;
+int prev_paper_x = -1;
+int prev_paper_y = -1;
 
 HDC hdc; // handle display context
 
 Camera camera{ 20, 45, 45 };
 CubeMap* cube_map;
-MyPen* pen_obj;
+MyPen* mypen;
 Paper* paper;
-
-float pen_x, pen_y;
 
 float animated = 0.0f;
 
 bool fullscreen = false;
-
-void toggle_fullscreen() {
-    fullscreen = !fullscreen;
-    if (fullscreen) {
-        prev_window_width = glutGet(GLUT_WINDOW_WIDTH);
-        prev_window_height = glutGet(GLUT_WINDOW_HEIGHT);
-        glutFullScreen();
-    } else {
-        glutReshapeWindow(prev_window_width, prev_window_height);
-    }
-}
 
 void init_font(HDC& hdc) {
     hdc = wglGetCurrentDC();
@@ -44,39 +29,10 @@ void init_font(HDC& hdc) {
     SelectObject(hdc, font);
 }
 
-void init() {
-    pen_obj = new MyPen;
+void init_model() {
+    cube_map = new CubeMap;
+    mypen = new MyPen;
     paper = new Paper;
-
-    init_font(hdc);
-
-    glClearColor(0, 0, 0, 1.0f);
-
-    glEnable(GL_DEPTH_TEST);
-    glClearDepth(1.0f);
-    glEnable(GL_TEXTURE_2D);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_LIGHTING);
-    GLfloat light_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    glEnable(GL_LIGHT0);
-
-    GLfloat specular_sun[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_sun);
-    glMaterialf(GL_FRONT, GL_SHININESS, 16);
-
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-    glEnable(GL_CULL_FACE);
-    cube_map = new CubeMap();
 }
 
 void init_light() {
@@ -94,7 +50,10 @@ void init_light() {
     glMaterialf(GL_FRONT, GL_SHININESS, 16.0f);
 }
 
-void init2() {
+void init() {
+    init_font(hdc);
+    init_model();
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_BLEND);
@@ -105,6 +64,8 @@ void init2() {
 
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0);
+
+    glEnable(GL_TEXTURE_2D);
 
     init_light();
 }
@@ -123,14 +84,12 @@ void draw(void) {
 
     camera.setup();
 
-    cube_map->draw();
+    cube_map->render();
 
-    paper->draw();
-
+    paper->render();
     draw_axis(5);
-    glTranslatef(pen_x, 1.89f, pen_y);
-    glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-    pen_obj->draw(animated);
+
+    mypen->render(animated);
     draw_axis(1);
 
     // text
@@ -162,18 +121,15 @@ void draw(void) {
     glutSwapBuffers();
 }
 
-int prev_x, prev_y;
-
-void motion_cb(int x, int y) {
-    int paper_x = x * paper->get_image_width() / window_width;
-    int paper_y = paper->get_image_height() - (y * paper->get_image_height() / window_height);
-    std::cout << paper_x << ' ' << paper_y << '\n';
-    paper->fill_pixel(paper_x, paper_y, pen_obj->get_line_color());
-    paper->update_texture();
-    prev_x = x;
-    prev_y = y;
-    pen_x = (x * 10.0f / window_width) - 5.0f; // paper size = 10.f
-    pen_y = (y * 10.0f / window_height) - 5.0f;
+void toggle_fullscreen() {
+    fullscreen = !fullscreen;
+    if (fullscreen) {
+        prev_window_width = glutGet(GLUT_WINDOW_WIDTH);
+        prev_window_height = glutGet(GLUT_WINDOW_HEIGHT);
+        glutFullScreen();
+    } else {
+        glutReshapeWindow(prev_window_width, prev_window_height);
+    }
 }
 
 void resize_cb(int width, int height) {
@@ -181,45 +137,71 @@ void resize_cb(int width, int height) {
     window_height = height;
 }
 
+void mouse_cb(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+        prev_paper_x = -1;
+        prev_paper_y = -1;
+    }
+}
+
+void motion_cb(int x, int y) {
+    float pen_x = (x * paper->get_width() / window_width) - (paper->get_width() / 2);
+    float pen_y = (y * paper->get_height() / window_height) - (paper->get_height() / 2);
+    int paper_x = x * paper->get_image_width() / window_width;
+    int paper_y = paper->get_image_height() - (y * paper->get_image_height() / window_height);
+    mypen->move(pen_x, pen_y);
+    if (prev_paper_x >= 0 && prev_paper_y >= 0) {
+        mypen->perform_draw_line(paper, paper_x, paper_y, prev_paper_x, prev_paper_y);
+        paper->update_texture();
+    }
+    prev_paper_x = paper_x;
+    prev_paper_y = paper_y;
+}
+
 void keyboard_cb(unsigned char key, int x, int y) {
     switch (key) {
-    case 'z':
-        camera.zoom_in();
-        break;
-    case 'x':
-        camera.zoom_out();
-        break;
-    case 's':
-        paper->save_as("paper.bmp");
-        break;
     case ',':
         animated = std::max(animated - 0.1f, 0.0f);
         break;
     case '.':
         animated += 0.1;
         break;
-    case ' ':
-        pen_obj->perform_click();
+    case 'w':
+        camera.rotate_up();
+        break;
+    case 'a':
+        camera.rotate_left();
+        break;
+    case 's':
+        camera.rotate_down();
+        break;
+    case 'd':
+        camera.rotate_right();
+        break;
+    case 'z':
+        camera.zoom_in();
+        break;
+    case 'x':
+        camera.zoom_out();
+        break;
+    case ' ': // spacebar
+        mypen->perform_click();
+        if (mypen->is_drawing_mode()) {
+            mypen->disable_drawing_mode();
+        } else {
+            mypen->enable_drawing_mode();
+        }
         break;
     }
 }
 
 void special_keyboard_cb(int key, int x, int y) {
     switch (key) {
+    case GLUT_KEY_F2:
+        paper->save_as("paper.bmp");
+        break;
     case GLUT_KEY_F11:
         toggle_fullscreen();
-        break;
-    case GLUT_KEY_LEFT:
-        camera.rotate_left();
-        break;
-    case GLUT_KEY_UP:
-        camera.rotate_up();
-        break;
-    case GLUT_KEY_RIGHT:
-        camera.rotate_right();
-        break;
-    case GLUT_KEY_DOWN:
-        camera.rotate_down();
         break;
     }
 }
@@ -232,12 +214,12 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
-    glutInitWindowPosition(300, 300);
     glutCreateWindow("12191765 박승재");
     init();
 
     glutDisplayFunc(draw);
     glutReshapeFunc(resize_cb);
+    glutMouseFunc(mouse_cb);
     glutMotionFunc(motion_cb);
     glutKeyboardFunc(keyboard_cb);
     glutSpecialFunc(special_keyboard_cb);
