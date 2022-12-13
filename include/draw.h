@@ -3,4 +3,5 @@
 #include <string>
 
 void draw_axis(float length);
+void draw_color_spheres();
 void draw_text(const HDC& hdc, const std::wstring& text);

@@ -15,10 +15,12 @@ int prev_paper_y = -1;
 
 HDC hdc; // handle display context
 
-Camera camera{ 20, 45, 45 };
+Camera camera{ 7.0f, 90.0f, 45.0f };
 CubeMap* cube_map;
 MyPen* mypen;
 Paper* paper;
+
+unsigned int sphere_selected = -1;
 
 float animated = 0.0f;
 
@@ -72,18 +74,21 @@ void init() {
 }
 
 void draw(void) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     // main viewport
     glViewport(0, 0, window_width, window_height);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0, (double) window_width / window_height, 0.1, 100.0);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
     camera.setup();
+
+    float light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     cube_map->render();
 
@@ -93,33 +98,87 @@ void draw(void) {
     mypen->render(animated);
     draw_axis(1);
 
-    // text
     draw_text(hdc, L"안녕");
 
     glFlush();
 
     // mini viewport
-    /*glViewport(0, window_height * 3 / 4, window_width / 4, window_height / 4);
+    int viewport_width = 160;
+    int viewport_height = 60;
+    glViewport(window_width - viewport_width, window_height - viewport_height, viewport_width, viewport_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45, (float)window_width / window_height, 1, 50);
+    glOrtho(-viewport_width / 2, viewport_width / 2, -viewport_height / 2, viewport_height / 2, -50.0, 50.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(3, 3, 3, 0, 0, 0, 0, 1, 0);
+    float light_position2[] = { 0.0f, 0.0f, 1.0f, 0.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position2);
 
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    // glDisable(GL_LIGHTING);
+    draw_color_spheres();
+    glEnable(GL_LIGHTING);
 
-    glPushMatrix();
-    glRotatef(-90, 1, 0, 0);
-    glColor3f(1, 1, 0);
-    glutSolidTorus(0.5, 1, 10, 10);
-    glPopMatrix();
-    draw_axis(2);
-    glFlush();*/
-
+    glFlush();
     glutSwapBuffers();
+}
+
+void pick(int x, int y) {
+    int viewport_width = 160;
+    int viewport_height = 60;
+
+    unsigned int select_buf[256];
+    glSelectBuffer(256, select_buf);
+
+    int viewport[4] = { window_width - viewport_width, 0, viewport_width, viewport_height }; // (x, y, width, height)
+
+    glRenderMode(GL_SELECT);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+
+    glLoadIdentity();
+    gluPickMatrix(x, y, 0.1, 0.1, viewport);
+    glOrtho(-viewport_width / 2, viewport_width / 2, -viewport_height / 2, viewport_height / 2, -50.0, 50.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    draw_color_spheres();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glFlush();
+
+    int hits = glRenderMode(GL_RENDER);
+    // std::cout << "hits: " << hits << '\n';
+    if (hits >= 1) {
+        unsigned int idx = 0;
+        unsigned int selected_z = -1; // max value of unsigned int(overflow)
+        sphere_selected = -1;
+        for (int i = 1; i <= hits; i += 1) {
+            unsigned int name_count = select_buf[idx]; // always 1
+            unsigned int z_min = select_buf[idx + 1];
+            unsigned int z_max = select_buf[idx + 2];
+            unsigned int name = select_buf[idx + 3];
+            idx += name_count + 3;
+            if (selected_z > z_max) {
+                selected_z = z_max;
+                sphere_selected = name;
+            }
+        }
+        if (sphere_selected == 0) {
+            std::cout << "Line color: black\n";
+            mypen->set_line_color({ 0.0f, 0.0f, 0.0f });
+        } else if (sphere_selected == 1) {
+            std::cout << "Line color: red\n";
+            mypen->set_line_color({ 1.0f, 0.0f, 0.0f });
+        } else if (sphere_selected == 2) {
+            std::cout << "Line color: blue\n";
+            mypen->set_line_color({ 0.0f, 0.0f, 1.0f });
+        }
+    }
 }
 
 void toggle_fullscreen() {
@@ -139,19 +198,25 @@ void resize_cb(int width, int height) {
 }
 
 void mouse_cb(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-        prev_paper_x = -1;
-        prev_paper_y = -1;
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            pick(x, y);
+
+        } else if (state == GLUT_UP) {
+            prev_paper_x = -1;
+            prev_paper_y = -1;
+            sphere_selected = -1;
+        }
     }
 }
 
 void motion_cb(int x, int y) {
     float pen_x = (x * paper->get_width() / window_width) - (paper->get_width() / 2);
     float pen_y = (y * paper->get_height() / window_height) - (paper->get_height() / 2);
+    mypen->move(pen_x, pen_y);
     int paper_x = x * paper->get_image_width() / window_width;
     int paper_y = paper->get_image_height() - (y * paper->get_image_height() / window_height);
-    mypen->move(pen_x, pen_y);
-    if (prev_paper_x >= 0 && prev_paper_y >= 0) {
+    if (prev_paper_x >= 0 && prev_paper_y >= 0 && mypen->is_clicked() && mypen->is_drawing_mode()) {
         mypen->perform_draw_line(paper, paper_x, paper_y, prev_paper_x, prev_paper_y);
         paper->update_texture();
     }
@@ -161,6 +226,14 @@ void motion_cb(int x, int y) {
 
 void keyboard_cb(unsigned char key, int x, int y) {
     switch (key) {
+    case '1':
+        preset_drawing(&camera);
+        mypen->enable_drawing_mode();
+        break;
+    case '2':
+        preset_observing(&camera);
+        mypen->disable_drawing_mode();
+        break;
     case ',':
         animated = std::max(animated - 0.1f, 0.0f);
         break;
@@ -187,11 +260,6 @@ void keyboard_cb(unsigned char key, int x, int y) {
         break;
     case ' ': // spacebar
         mypen->perform_click();
-        if (mypen->is_drawing_mode()) {
-            mypen->disable_drawing_mode();
-        } else {
-            mypen->enable_drawing_mode();
-        }
         PlaySound(TEXT("res/click.wav"), NULL, SND_ASYNC);
         break;
     }

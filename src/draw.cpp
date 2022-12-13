@@ -20,6 +20,32 @@ void draw_axis(float length) {
     glEnable(GL_LIGHTING);
 }
 
+void draw_color_spheres() {
+    glInitNames();
+    glPushName(-1); // no empty stack
+
+    glLoadName(0);
+    glPushMatrix();
+    glTranslatef(-50.0f, 0.0f, 0.0f);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glutSolidSphere(20.0f, 20, 20);
+    glPopMatrix();
+
+    glLoadName(1);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.0f);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glutSolidSphere(20.0f, 20, 20);
+    glPopMatrix();
+
+    glLoadName(2);
+    glPushMatrix();
+    glTranslatef(50.0f, 0.0f, 0.0f);
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glutSolidSphere(20.0f, 20, 20);
+    glPopMatrix();
+}
+
 void draw_text(const HDC& hdc, const std::wstring& text) {
     glDisable(GL_LIGHTING);
     glMatrixMode(GL_PROJECTION);

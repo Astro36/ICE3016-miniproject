@@ -8,6 +8,12 @@ Camera::Camera(float radius, float phi, float theta)
 : radius(radius), phi(phi), theta(theta) {
 }
 
+void Camera::move(float radius, float phi, float theta) {
+    this->radius = radius;
+    this->phi = phi;
+    this->theta = theta;
+}
+
 void Camera::rotate_left() {
     theta -= camera_rotation_speed;
     if (theta < 0) {
@@ -76,4 +82,12 @@ float Camera::get_upy() const {
 
 float radian(float degree) {
     return degree * M_PI / 180;
+}
+
+void preset_drawing(Camera* camera) {
+    camera->move(25.0f, 90.0f, 0.0f);
+}
+
+void preset_observing(Camera* camera) {
+    camera->move(7.0f, 90.0f, 45.0f);
 }

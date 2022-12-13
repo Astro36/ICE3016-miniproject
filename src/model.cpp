@@ -152,13 +152,13 @@ void Paper::render() const {
     glBegin(GL_QUADS);
     glNormal3f(0.0f, 1.0, 0.0f);
     glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-half_width / 2, 0.0f, half_height / 2);
+    glVertex3f(-half_width, 0.0f, half_height);
     glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(half_width / 2, 0.0f, half_height / 2);
+    glVertex3f(half_width, 0.0f, half_height);
     glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(half_width / 2, 0.0f, -half_height / 2);
+    glVertex3f(half_width, 0.0f, -half_height);
     glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-half_width / 2, 0.0f, -half_height / 2);
+    glVertex3f(-half_width, 0.0f, -half_height);
     glEnd();
 }
 
