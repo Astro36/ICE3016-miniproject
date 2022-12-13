@@ -28,6 +28,8 @@ private:
 };
 
 void preset_drawing(Camera* camera);
+void preset_disassembling(Camera* camera);
 void preset_observing(Camera* camera);
+void preset_printing(Camera* camera);
 
 float radian(float degree);

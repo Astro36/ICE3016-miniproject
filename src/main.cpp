@@ -6,6 +6,8 @@
 #include "draw.h"
 #include "model.h"
 
+constexpr unsigned int interval = 1;
+
 int window_width = 500;
 int window_height = 500;
 int prev_window_width = 500;
@@ -21,9 +23,8 @@ MyPen* mypen;
 Paper* paper;
 
 unsigned int sphere_selected = -1;
-
-float animated = 0.0f;
-
+float disassembling_animate = -1.0f;
+float printing_animate = -1.0f;
 bool fullscreen = false;
 
 void init_font(HDC& hdc) {
@@ -81,7 +82,11 @@ void draw(void) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (double) window_width / window_height, 0.1, 100.0);
+    if (printing_animate < 0.0f) {
+        gluPerspective(45.0, (double) window_width / window_height, 0.1, 100.0);
+    } else {
+        gluPerspective(45.0, (double) window_width / window_height, printing_animate, 50.0);
+    }
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -91,11 +96,13 @@ void draw(void) {
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     cube_map->render();
-
     paper->render();
-    draw_axis(5);
 
-    mypen->render(animated);
+    if (disassembling_animate < 0.0f) {
+        mypen->render(0.0f);
+    } else {
+        mypen->render(disassembling_animate);
+    }
     draw_axis(1);
 
     draw_text(hdc, L"안녕");
@@ -201,7 +208,6 @@ void mouse_cb(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
             pick(x, y);
-
         } else if (state == GLUT_UP) {
             prev_paper_x = -1;
             prev_paper_y = -1;
@@ -227,18 +233,34 @@ void motion_cb(int x, int y) {
 void keyboard_cb(unsigned char key, int x, int y) {
     switch (key) {
     case '1':
+        std::cout << "Drawing mode\n";
+        disassembling_animate = -1.0f;
+        printing_animate = -1.0f;
         preset_drawing(&camera);
+        mypen->move(0.0f, 0.0f);
         mypen->enable_drawing_mode();
         break;
     case '2':
+        std::cout << "Modeling mode\n";
+        disassembling_animate = -1.0f;
+        printing_animate = -1.0f;
         preset_observing(&camera);
+        mypen->move(0.0f, 0.0f);
+        mypen->disable_drawing_mode();
+        break;
+    case '3':
+        std::cout << "Disassembling mode\n";
+        disassembling_animate = 0.0f;
+        printing_animate = -1.0f;
+        preset_disassembling(&camera);
+        mypen->move(0.0f, 0.0f);
         mypen->disable_drawing_mode();
         break;
     case ',':
-        animated = std::max(animated - 0.1f, 0.0f);
+        printing_animate = std::max(printing_animate - 0.1f, 0.0f);
         break;
     case '.':
-        animated += 0.1;
+        printing_animate += 0.1;
         break;
     case 'w':
         camera.rotate_up();
@@ -259,6 +281,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
         camera.zoom_out();
         break;
     case ' ': // spacebar
+        std::cout << "Pen clicked\n";
         mypen->perform_click();
         PlaySound(TEXT("res/click.wav"), NULL, SND_ASYNC);
         break;
@@ -268,15 +291,39 @@ void keyboard_cb(unsigned char key, int x, int y) {
 void special_keyboard_cb(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_F2:
-        paper->save_as("paper.bmp");
+        std::cout << "Print mode\n";
+        disassembling_animate = -1.0f;
+        printing_animate = 37.5f;
+        preset_printing(&camera);
+        mypen->move(50.0f, 0.0f);
+        mypen->disable_drawing_mode();
         break;
     case GLUT_KEY_F11:
+        std::cout << "Toggle fullscreen\n";
         toggle_fullscreen();
         break;
     }
 }
 
-void background_cb(void) {
+void time_cb(int value) {
+    if (disassembling_animate >= 0.0f && disassembling_animate < 1.5f) {
+        disassembling_animate += 0.01f;
+        if (disassembling_animate >= 1.5f) {
+            disassembling_animate = 1.5f;
+        }
+    }
+    if (printing_animate > 0.0f) {
+        printing_animate -= 0.1f;
+        if (printing_animate <= 20.0f) {
+            std::cout << "Image saved\n";
+            paper->save_as("paper.bmp");
+            printing_animate = -1.0f;
+        }
+    }
+    glutTimerFunc(interval, time_cb, NULL);
+}
+
+void background_cb() {
     glutPostRedisplay();
 }
 
@@ -293,6 +340,7 @@ int main(int argc, char** argv) {
     glutMotionFunc(motion_cb);
     glutKeyboardFunc(keyboard_cb);
     glutSpecialFunc(special_keyboard_cb);
+    glutTimerFunc(interval, time_cb, NULL);
     glutIdleFunc(background_cb);
 
     glutMainLoop();
