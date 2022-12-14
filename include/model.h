@@ -54,8 +54,11 @@ private:
         Barrel();
         ~Barrel();
         void draw() const;
+        void set_color(const Color& color);
 
     private:
+        unsigned int texture;
+        Bitmap* image;
         Object* obj;
     };
 

@@ -89,7 +89,7 @@ void preset_drawing(Camera* camera) {
 }
 
 void preset_disassembling(Camera* camera) {
-    camera->move(10.0f, 90.0f, 45.0f);
+    camera->move(9.0f, 90.0f, 45.0f);
 }
 
 void preset_observing(Camera* camera) {

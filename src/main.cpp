@@ -69,8 +69,6 @@ void init() {
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0);
 
-    glEnable(GL_TEXTURE_2D);
-
     init_light();
 }
 

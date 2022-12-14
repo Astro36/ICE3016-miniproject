@@ -57,15 +57,15 @@ Object::Object(const std::string& filename) {
 void Object::draw() const {
     glBegin(GL_TRIANGLES);
     for (std::size_t n = 0; n < vertex_indices.size(); n += 3) {
-        // glTexCoord2f(objParser->textures[objParser->textureIdx[n] - 1].x, objParser->textures[objParser->textureIdx[n] - 1].y);
+        glTexCoord2f(textures[texture_indices[n] - 1].x, textures[texture_indices[n] - 1].y);
         glNormal3f(normals[normal_indices[n] - 1].x, normals[normal_indices[n] - 1].y, normals[normal_indices[n] - 1].z);
         glVertex3f(vertices[vertex_indices[n] - 1].x, vertices[vertex_indices[n] - 1].y, vertices[vertex_indices[n] - 1].z);
 
-        // glTexCoord2f(objParser->textures[objParser->textureIdx[n + 1] - 1].x, objParser->textures[objParser->textureIdx[n + 1] - 1].y);
+        glTexCoord2f(textures[texture_indices[n + 1] - 1].x, textures[texture_indices[n + 1] - 1].y);
         glNormal3f(normals[normal_indices[n + 1] - 1].x, normals[normal_indices[n + 1] - 1].y, normals[normal_indices[n + 1] - 1].z);
         glVertex3f(vertices[vertex_indices[n + 1] - 1].x, vertices[vertex_indices[n + 1] - 1].y, vertices[vertex_indices[n + 1] - 1].z);
 
-        // glTexCoord2f(objParser->textures[objParser->textureIdx[n + 2] - 1].x, objParser->textures[objParser->textureIdx[n + 2] - 1].y);
+        glTexCoord2f(textures[texture_indices[n + 2] - 1].x, textures[texture_indices[n + 2] - 1].y);
         glNormal3f(normals[normal_indices[n + 2] - 1].x, normals[normal_indices[n + 2] - 1].y, normals[normal_indices[n + 2] - 1].z);
         glVertex3f(vertices[vertex_indices[n + 2] - 1].x, vertices[vertex_indices[n + 2] - 1].y, vertices[vertex_indices[n + 2] - 1].z);
     }

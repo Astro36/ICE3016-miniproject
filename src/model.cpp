@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include <GL/glext.h>
 #include <algorithm>
+#include <cstring>
 #include "bitmap.h"
 #include "object.h"
 
@@ -148,6 +149,7 @@ int Paper::get_image_height() const {
 void Paper::render() const {
     float half_width = width / 2;
     float half_height = height / 2;
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
     glBegin(GL_QUADS);
     glNormal3f(0.0f, 1.0, 0.0f);
@@ -160,6 +162,7 @@ void Paper::render() const {
     glTexCoord2f(0.0f, 1.0f);
     glVertex3f(-half_width, 0.0f, -half_height);
     glEnd();
+    glDisable(GL_TEXTURE_2D);
 }
 
 void Paper::save_as(const std::string& out_filename) const {
@@ -261,9 +264,11 @@ void MyPen::perform_draw_line(Paper* paper, int x1, int y1, int x2, int y2) {
 }
 
 void MyPen::render(float animated) const {
-    glTranslatef(x, 1.89f, y);
     if (drawing) {
+        glTranslatef(x, 1.89f, y);
         glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+    } else {
+        glTranslatef(x, 0.5f, y);
     }
 
     glTranslatef(-1.5f * animated, 0.0f, 0.0f);
@@ -300,19 +305,52 @@ void MyPen::render(float animated) const {
 }
 
 void MyPen::set_line_color(const Color& color) {
+    pen_barrel.set_color(color);
     line_color = color;
 }
 
 MyPen::Barrel::Barrel()
-: obj(new Object("res/mypen-barrel.obj")) {}
+: image(new Bitmap{ "res/mypen.bmp" }), obj(new Object("res/mypen-barrel.obj")) {
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, image->get_width(), image->get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->get_pixels());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+}
 
 MyPen::Barrel::~Barrel() {
+    delete image;
     delete obj;
 }
 
 void MyPen::Barrel::draw() const {
-    glColor4f(0.2f, 0.2f, 0.2f, 0.9f);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture);
     obj->draw();
+    glDisable(GL_TEXTURE_2D);
+}
+
+void MyPen::Barrel::set_color(const Color& color) {
+    int width = image->get_width();
+    int height = image->get_height();
+    int channels = image->get_channels();
+    unsigned char* pixels = new unsigned char[width * height * channels];
+    std::memcpy(pixels, image->get_pixels(), width * height * channels);
+    for (int x = 0; x < width; x += 1) {
+        for (int y = 0; y < height; y += 1) {
+            if (pixels[channels * (y * width + x)] == 0 && pixels[channels * (y * width + x) + 1] == 0 && pixels[channels * (y * width + x) + 2] == 0) {
+                pixels[channels * (y * width + x)] = color.red * 120;
+                pixels[channels * (y * width + x) + 1] = color.green * 120;
+                pixels[channels * (y * width + x) + 2] = color.blue * 120;
+            }
+        }
+    }
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    delete[] pixels;
 }
 
 MyPen::Cap::Cap()
@@ -336,6 +374,7 @@ MyPen::Clip::~Clip() {
 
 void MyPen::Clip::draw() const {
     glColor3f(0.8f, 0.8f, 0.8f);
+    glDisable(GL_TEXTURE_2D);
     obj->draw();
 }
 
