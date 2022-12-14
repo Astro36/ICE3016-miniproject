@@ -16,17 +16,17 @@ CubeMap::CubeMap(float size)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    Bitmap image_px{ "res/1024px.bmp" };
+    Bitmap image_px{ "res/cubemap/px.bmp" };
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, image_px.get_width(), image_px.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_px.get_pixels());
-    Bitmap image_nx{ "res/1024nx.bmp" };
+    Bitmap image_nx{ "res/cubemap/nx.bmp" };
     glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, image_nx.get_width(), image_nx.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_nx.get_pixels());
-    Bitmap image_py{ "res/1024py.bmp" };
+    Bitmap image_py{ "res/cubemap/py.bmp" };
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, image_py.get_width(), image_py.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_py.get_pixels());
-    Bitmap image_ny{ "res/1024ny.bmp" };
+    Bitmap image_ny{ "res/cubemap/ny.bmp" };
     glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, image_ny.get_width(), image_ny.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_ny.get_pixels());
-    Bitmap image_pz{ "res/1024pz.bmp" };
+    Bitmap image_pz{ "res/cubemap/pz.bmp" };
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, image_pz.get_width(), image_pz.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_pz.get_pixels());
-    Bitmap image_nz{ "res/1024nz.bmp" };
+    Bitmap image_nz{ "res/cubemap/nz.bmp" };
     glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, image_nz.get_width(), image_nz.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image_nz.get_pixels());
 
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
