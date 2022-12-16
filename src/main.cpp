@@ -337,6 +337,18 @@ void background_cb() {
     glutPostRedisplay();
 }
 
+void menu_cb(int entry) {
+    switch (entry) {
+    case 1:
+        paper->clear();
+        paper->update_texture();
+        break;
+    case 2:
+        exit(0);
+        break;
+    }
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
@@ -352,6 +364,11 @@ int main(int argc, char** argv) {
     glutSpecialFunc(special_keyboard_cb);
     glutTimerFunc(interval, time_cb, NULL);
     glutIdleFunc(background_cb);
+
+    glutCreateMenu(menu_cb);
+    glutAddMenuEntry("Clear", 1);
+    glutAddMenuEntry("Quit", 2);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 
     glutMainLoop();
     return 0;

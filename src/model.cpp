@@ -124,6 +124,12 @@ Paper::~Paper() {
     delete image;
 }
 
+void Paper::clear() {
+    Bitmap* new_image = new Bitmap{ image->get_width(), image->get_height() };
+    delete image;
+    image = new_image;
+}
+
 void Paper::fill_pixel(int x, int y, const Color& color) {
     if (x >= 0 && x < image->get_width() && y > 0 && y < image->get_height()) {
         image->fill_pixel(x, y, color);

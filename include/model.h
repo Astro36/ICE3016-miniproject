@@ -17,6 +17,7 @@ class Paper {
 public:
     Paper(float width = 20.0f, float height = 20.0f, int image_width = 512, int image_height = 512);
     ~Paper();
+    void clear();
     void fill_pixel(int x, int y, const Color& color);
     float get_width() const;
     float get_height() const;
