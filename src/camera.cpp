@@ -97,5 +97,5 @@ void preset_observing(Camera* camera) {
 }
 
 void preset_printing(Camera* camera) {
-    camera->move(30.0f, 45.0f, 90.0f);
+    camera->move(30.0f, 45.0f, 0.0f);
 }
