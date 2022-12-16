@@ -53,7 +53,7 @@ private:
     public:
         Barrel();
         ~Barrel();
-        void draw() const;
+        void render() const;
         void set_color(const Color& color);
 
     private:
@@ -66,7 +66,7 @@ private:
     public:
         Cap();
         ~Cap();
-        void draw() const;
+        void render() const;
 
     private:
         Object* obj;
@@ -76,7 +76,7 @@ private:
     public:
         Clip();
         ~Clip();
-        void draw() const;
+        void render() const;
 
     private:
         Object* obj;
@@ -86,7 +86,7 @@ private:
     public:
         Grip();
         ~Grip();
-        void draw() const;
+        void render() const;
 
     private:
         Object* obj;
@@ -96,7 +96,7 @@ private:
     public:
         Socket();
         ~Socket();
-        void draw() const;
+        void render() const;
 
     private:
         Object* obj;
@@ -106,8 +106,8 @@ private:
     public:
         Spring();
         ~Spring();
-        void draw() const;
-        void draw_compressed() const;
+        void render() const;
+        void render_compressed() const;
 
     private:
         Object* obj;
@@ -117,7 +117,7 @@ private:
     public:
         Tip();
         ~Tip();
-        void draw() const;
+        void render() const;
 
     private:
         Object* obj;
@@ -127,7 +127,7 @@ private:
     public:
         Reservoir();
         ~Reservoir();
-        void draw() const;
+        void render() const;
 
     private:
         Object* obj;

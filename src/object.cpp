@@ -54,7 +54,7 @@ Object::Object(const std::string& filename) {
     fclose(fp);
 }
 
-void Object::draw() const {
+void Object::render() const {
     glBegin(GL_TRIANGLES);
     for (std::size_t n = 0; n < vertex_indices.size(); n += 3) {
         glTexCoord2f(textures[texture_indices[n] - 1].x, textures[texture_indices[n] - 1].y);

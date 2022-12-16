@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <mmsystem.h>
+#include <string>
 #include "camera.h"
 #include "draw.h"
 #include "model.h"
@@ -26,6 +27,15 @@ unsigned int sphere_selected = -1;
 float disassembling_animate = -1.0f;
 float printing_animate = -1.0f;
 bool fullscreen = false;
+
+std::wstring titles[5] = {
+    L"환영합니다",
+    L"그리기 모드",
+    L"관찰 모드",
+    L"분해 모드",
+    L"출력 모드"
+};
+unsigned int title_number = 0;
 
 void init_font(HDC& hdc) {
     hdc = wglGetCurrentDC();
@@ -103,7 +113,8 @@ void draw(void) {
     }
     draw_axis(1);
 
-    draw_text(hdc, L"안녕");
+    glColor3f(0.0f, 0.0f, 0.0f);
+    draw_text(hdc, titles[title_number]);
 
     glFlush();
 
@@ -118,10 +129,7 @@ void draw(void) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    float light_position2[] = { 0.0f, 0.0f, 1.0f, 0.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position2);
-
-    // glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHTING);
     draw_color_spheres();
     glEnable(GL_LIGHTING);
 
@@ -234,6 +242,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
         std::cout << "Drawing mode\n";
         disassembling_animate = -1.0f;
         printing_animate = -1.0f;
+        title_number = 1;
         preset_drawing(&camera);
         mypen->move(0.0f, 0.0f);
         mypen->enable_drawing_mode();
@@ -242,6 +251,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
         std::cout << "Modeling mode\n";
         disassembling_animate = -1.0f;
         printing_animate = -1.0f;
+        title_number = 2;
         preset_observing(&camera);
         mypen->move(0.0f, 0.0f);
         mypen->disable_drawing_mode();
@@ -250,6 +260,7 @@ void keyboard_cb(unsigned char key, int x, int y) {
         std::cout << "Disassembling mode\n";
         disassembling_animate = 0.0f;
         printing_animate = -1.0f;
+        title_number = 3;
         preset_disassembling(&camera);
         mypen->move(0.0f, 0.0f);
         mypen->disable_drawing_mode();
@@ -292,6 +303,7 @@ void special_keyboard_cb(int key, int x, int y) {
         std::cout << "Print mode\n";
         disassembling_animate = -1.0f;
         printing_animate = 37.5f;
+        title_number = 4;
         preset_printing(&camera);
         mypen->move(50.0f, 0.0f);
         mypen->disable_drawing_mode();
@@ -327,7 +339,7 @@ void background_cb() {
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowSize(window_width, window_height);
     glutCreateWindow("12191765 박승재");
     init();

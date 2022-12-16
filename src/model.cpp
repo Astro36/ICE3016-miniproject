@@ -272,24 +272,24 @@ void MyPen::render(float animated) const {
     }
 
     glTranslatef(-1.5f * animated, 0.0f, 0.0f);
-    pen_barrel.draw();
-    pen_clip.draw();
-    pen_grip.draw();
+    pen_barrel.render();
+    pen_clip.render();
+    pen_grip.render();
 
     if (!clicked) {
         glTranslatef(-0.1f, 0.0f, 0.0f);
     }
     glPushMatrix();
     glTranslatef(-0.5f * animated, 0.0f, 0.0f);
-    pen_cap.draw();
+    pen_cap.render();
     glPopMatrix();
 
     glTranslatef(1.0f * animated, 0.0f, 0.0f);
-    pen_reservoir.draw();
-    pen_socket.draw();
+    pen_reservoir.render();
+    pen_socket.render();
 
     glTranslatef(0.75f * animated, 0.0f, 0.0f);
-    pen_spring.draw();
+    pen_spring.render();
 
     glColor3f(line_color.red, line_color.green, line_color.blue);
     glPushMatrix();
@@ -301,7 +301,7 @@ void MyPen::render(float animated) const {
         glTranslatef(0.1f, 0.0f, 0.0f);
     }
     glTranslatef(0.75f * animated, 0.0f, 0.0f);
-    pen_tip.draw();
+    pen_tip.render();
 }
 
 void MyPen::set_line_color(const Color& color) {
@@ -310,7 +310,7 @@ void MyPen::set_line_color(const Color& color) {
 }
 
 MyPen::Barrel::Barrel()
-: image(new Bitmap{ "res/mypen.bmp" }), obj(new Object("res/mypen-barrel.obj")) {
+: image(new Bitmap{ "res/mypen-barrel.bmp" }), obj(new Object("res/mypen-barrel.obj")) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, image->get_width(), image->get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->get_pixels());
@@ -326,10 +326,10 @@ MyPen::Barrel::~Barrel() {
     delete obj;
 }
 
-void MyPen::Barrel::draw() const {
+void MyPen::Barrel::render() const {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
-    obj->draw();
+    obj->render();
     glDisable(GL_TEXTURE_2D);
 }
 
@@ -360,9 +360,9 @@ MyPen::Cap::~Cap() {
     delete obj;
 }
 
-void MyPen::Cap::draw() const {
+void MyPen::Cap::render() const {
     glColor4f(0.2f, 0.2f, 0.2f, 0.9f);
-    obj->draw();
+    obj->render();
 }
 
 MyPen::Clip::Clip()
@@ -372,10 +372,10 @@ MyPen::Clip::~Clip() {
     delete obj;
 }
 
-void MyPen::Clip::draw() const {
+void MyPen::Clip::render() const {
     glColor3f(0.8f, 0.8f, 0.8f);
     glDisable(GL_TEXTURE_2D);
-    obj->draw();
+    obj->render();
 }
 
 MyPen::Grip::Grip()
@@ -385,9 +385,9 @@ MyPen::Grip::~Grip() {
     delete obj;
 }
 
-void MyPen::Grip::draw() const {
+void MyPen::Grip::render() const {
     glColor3f(0.2f, 0.2f, 0.2f);
-    obj->draw();
+    obj->render();
 }
 
 MyPen::Socket::Socket()
@@ -397,9 +397,9 @@ MyPen::Socket::~Socket() {
     delete obj;
 }
 
-void MyPen::Socket::draw() const {
+void MyPen::Socket::render() const {
     glColor3f(0.8f, 0.8f, 0.8f);
-    obj->draw();
+    obj->render();
 }
 
 MyPen::Spring::Spring() {
@@ -410,17 +410,17 @@ MyPen::Spring::~Spring() {
     delete obj;
 }
 
-void MyPen::Spring::draw() const {
+void MyPen::Spring::render() const {
     glColor3f(0.9f, 0.9f, 0.9f);
-    obj->draw();
+    obj->render();
 }
 
-void MyPen::Spring::draw_compressed() const {
+void MyPen::Spring::render_compressed() const {
     glColor3f(1.0f, 0.0f, 0.0f);
     glPushMatrix();
     glScalef(0.4f, 1.0f, 1.0f);
     glTranslatef(1.98f, 0.0f, 0.0f);
-    obj->draw();
+    obj->render();
     glPopMatrix();
 }
 
@@ -431,9 +431,9 @@ MyPen::Tip::~Tip() {
     delete obj;
 }
 
-void MyPen::Tip::draw() const {
+void MyPen::Tip::render() const {
     glColor3f(0.1f, 0.1f, 0.1f);
-    obj->draw();
+    obj->render();
 }
 
 MyPen::Reservoir::Reservoir()
@@ -443,7 +443,7 @@ MyPen::Reservoir::~Reservoir() {
     delete obj;
 }
 
-void MyPen::Reservoir::draw() const {
+void MyPen::Reservoir::render() const {
     glColor4f(0.95f, 0.95f, 1.0f, 0.8f);
-    obj->draw();
+    obj->render();
 }

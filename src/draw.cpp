@@ -57,7 +57,6 @@ void draw_text(const HDC& hdc, const std::wstring& text) {
     glPushMatrix();
     glLoadIdentity();
 
-    glColor3f(1.0f, 1.0f, 1.0f); // white
     glRasterPos3f(0.5f, 1.0f, 0.0f);
     for (int i = 0; i < text.size(); i += 1) {
         int list = glGenLists(1);

@@ -18,7 +18,7 @@ class Object {
 public:
     Object(const std::string& filename);
     ~Object() = default;
-    void draw() const;
+    void render() const;
 
 private:
     std::string name;
