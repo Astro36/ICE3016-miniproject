@@ -1,3 +1,3 @@
-[submodule "freeglut-prebuilt"]
-	path = freeglut-prebuilt
+[submodule "freeglut"]
+	path = freeglut
 	url = https://github.com/Astro36/freeglut-prebuilt.git
