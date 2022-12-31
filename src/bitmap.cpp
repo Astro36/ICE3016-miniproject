@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "bitmap.h"
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <algorithm>
 #include <cstdio>
 #include <string>

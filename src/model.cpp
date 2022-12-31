@@ -1,5 +1,5 @@
 #include "model.h"
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <GL/glext.h>
 #include <algorithm>
 #include <cstring>

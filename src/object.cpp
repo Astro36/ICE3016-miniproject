@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "object.h"
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cstddef>
 #include <cstdio>
 #include <string>

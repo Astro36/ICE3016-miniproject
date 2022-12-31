@@ -1,5 +1,5 @@
 #include "draw.h"
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <string>
 
 void draw_axis(float length) {

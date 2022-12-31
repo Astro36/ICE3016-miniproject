@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 #include "camera.h"
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cmath>
 #include <limits>
 

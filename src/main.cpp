@@ -1,4 +1,4 @@
-﻿#include <GL/glut.h>
+﻿#include <GL/freeglut.h>
 #include <Windows.h>
 #include <iostream>
 #include <mmsystem.h>
