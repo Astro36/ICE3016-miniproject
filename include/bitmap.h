@@ -11,7 +11,8 @@ class Bitmap {
 public:
     Bitmap() = delete;
     Bitmap(int width, int height);
-    Bitmap(const std::string& filename);
+    explicit Bitmap(const std::string& filename);
+    explicit Bitmap(const Bitmap& bitmap);
     ~Bitmap();
     void fill_pixel(int x, int y, const Color& color);
     int get_channels() const;

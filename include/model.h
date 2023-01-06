@@ -4,7 +4,7 @@
 
 class CubeMap {
 public:
-    CubeMap(float size = 50.0f);
+    explicit CubeMap(float size = 50.0f);
     ~CubeMap() = default;
     void render() const;
 
@@ -15,7 +15,7 @@ private:
 
 class Paper {
 public:
-    Paper(float width = 20.0f, float height = 20.0f, int image_width = 512, int image_height = 512);
+    explicit Paper(float width = 20.0f, float height = 20.0f, int image_width = 512, int image_height = 512);
     ~Paper();
     void clear();
     void fill_pixel(int x, int y, const Color& color);
@@ -53,6 +53,7 @@ private:
     class Barrel {
     public:
         Barrel();
+        
         ~Barrel();
         void render() const;
         void set_color(const Color& color);

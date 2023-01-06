@@ -172,7 +172,6 @@ void pick(int x, int y) {
         sphere_selected = -1;
         for (int i = 1; i <= hits; i += 1) {
             unsigned int name_count = select_buf[idx]; // always 1
-            unsigned int z_min = select_buf[idx + 1];
             unsigned int z_max = select_buf[idx + 2];
             unsigned int name = select_buf[idx + 3];
             idx += name_count + 3;

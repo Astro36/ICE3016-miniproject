@@ -345,12 +345,12 @@ void MyPen::Barrel::set_color(const Color& color) {
     int channels = image->get_channels();
     unsigned char* pixels = new unsigned char[width * height * channels];
     std::memcpy(pixels, image->get_pixels(), width * height * channels);
-    for (int x = 0; x < width; x += 1) {
-        for (int y = 0; y < height; y += 1) {
-            if (pixels[channels * (y * width + x)] == 0 && pixels[channels * (y * width + x) + 1] == 0 && pixels[channels * (y * width + x) + 2] == 0) {
-                pixels[channels * (y * width + x)] = color.red * 120;
-                pixels[channels * (y * width + x) + 1] = color.green * 120;
-                pixels[channels * (y * width + x) + 2] = color.blue * 120;
+    for (int image_x = 0; image_x < width; image_x += 1) {
+        for (int image_y = 0; image_y < height; image_y += 1) {
+            if (pixels[channels * (image_y * width + image_x)] == 0 && pixels[channels * (image_y * width + image_x) + 1] == 0 && pixels[channels * (image_y * width + image_x) + 2] == 0) {
+                pixels[channels * (image_y * width + image_x)] = color.red * 120;
+                pixels[channels * (image_y * width + image_x) + 1] = color.green * 120;
+                pixels[channels * (image_y * width + image_x) + 2] = color.blue * 120;
             }
         }
     }

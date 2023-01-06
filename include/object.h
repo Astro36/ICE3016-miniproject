@@ -16,7 +16,7 @@ struct Vec3f {
 
 class Object {
 public:
-    Object(const std::string& filename);
+    explicit Object(const std::string& filename);
     ~Object() = default;
     void render() const;
 

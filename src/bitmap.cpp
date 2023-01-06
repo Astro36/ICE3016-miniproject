@@ -26,7 +26,6 @@ Bitmap::Bitmap(const std::string& filename) {
         return;
     }
 
-    unsigned int offset = *(unsigned int*) &(header[0x0A]);
     width = *(int*) &(header[0x12]);
     height = *(int*) &(header[0x16]);
     unsigned int size = *(unsigned int*) &(header[0x22]); // image size
@@ -37,9 +36,6 @@ Bitmap::Bitmap(const std::string& filename) {
         channels = 3;
     }
     size = width * height * channels;
-    if (offset == 0) {
-        offset = 54; // The BMP header is done that way
-    }
     pixels = new unsigned char[size]; // image pixel data
     fread(pixels, sizeof(unsigned char), size, fp);
     fclose(fp);
@@ -47,6 +43,13 @@ Bitmap::Bitmap(const std::string& filename) {
     if (channels == 3) { // BGR order -> RGB order
         reverse_each_pixel(width, height, pixels);
     }
+}
+
+Bitmap::Bitmap(const Bitmap& bitmap)
+: width(bitmap.get_width()), height(bitmap.get_height()), channels(bitmap.get_channels()) {
+    unsigned int size = width * height * channels;
+    pixels = new unsigned char[size];
+    std::copy(bitmap.get_pixels(), bitmap.get_pixels() + size, pixels);
 }
 
 Bitmap::~Bitmap() {
