@@ -16,12 +16,14 @@ Bitmap::Bitmap(const std::string& filename) {
     FILE* fp = fopen(filename.c_str(), "rb");
     if (!fp) {
         perror("File opening failed\n");
+        return;
     }
 
     unsigned char header[54]; // bitmap header
     if (fread(header, sizeof(unsigned char), 54, fp) != 54 || header[0] != 'B' || header[1] != 'M') {
         perror("Invalid BMP file\n");
         fclose(fp);
+        return;
     }
 
     unsigned int offset = *(unsigned int*) &(header[0x0A]);
@@ -100,6 +102,7 @@ void Bitmap::save(const std::string& out_filename, const std::string& ref_filena
     FILE* ofp = fopen(out_filename.c_str(), "wb");
     if (!ofp) {
         perror("File opening failed\n");
+        delete[] ref_header;
         return;
     }
     fwrite(ref_header, sizeof(unsigned char), ref_offset, ofp);
