@@ -7,6 +7,10 @@
 ![VisualStudio](https://img.shields.io/badge/visualstudio-2022-5C2D91?logo=visualstudio&logoColor=white&style=for-the-badge)
 ![Blender](https://img.shields.io/badge/blender-3.3%20LTS-F5792A?logo=blender&logoColor=white&style=for-the-badge)
 
+| YouTube 발표영상 |
+| --- |
+| [![youtube](https://int-i.github.io/assets/posts/2023-03-07-computer-graphics-review/ppt10.jpg)](https://youtu.be/zj_bYKwh2dY) |
+
 - 프로젝트 발표자료: [report.pdf](./report.pdf)
 - 수강후기: [그래픽스는 수학을 좋아한다 - 인하대학교 인트아이](https://int-i.github.io/retrospective/2023-03-07/computer-graphics-review/)
 
