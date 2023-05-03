@@ -2,6 +2,11 @@
 
 > 볼펜 3차원 제품 카탈로그 제작
 
+![C++](https://img.shields.io/badge/c++-14-00599C?logo=c%2B%2B&logoColor=white&style=for-the-badge)
+![OpenGL](https://img.shields.io/badge/opengl-freeglut-5586A4?logo=opengl&logoColor=white&style=for-the-badge)
+![VisualStudio](https://img.shields.io/badge/visualstudio-2022-5C2D91?logo=visualstudio&logoColor=white&style=for-the-badge)
+![Blender](https://img.shields.io/badge/blender-3.3%20LTS-F5792A?logo=blender&logoColor=white&style=for-the-badge)
+
 발표자료: [report.pdf](./report.pdf)
 
 ## 프로젝트 주제
